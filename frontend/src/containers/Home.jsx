@@ -1,87 +1,166 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import Loading from '../assets/img/loading.gif';
-import postImage from '../assets/img/newspaper-icon-png.jpg';
-import PostForm from '../components/Posts/PostForm';
-import Post from '../components/Posts/Post';
-import { fetchPosts } from '../reducks/posts/operations';
-import { getPosts } from '../reducks/posts/selectors';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useHistory, useLocation } from "react-router";
+import ReactPaginate from "react-paginate";
 
-const Home = () => {
+import Empty from "../componets/default/Empty";
+import ProductListCard from "../componets/homepage/ProductListCard";
+import { Female, Male } from "../constants";
+import { fetchCarts } from "../redux/cart/operations";
+import { getCarts } from "../redux/cart/selectors";
+import { fetchCategories } from "../redux/category/operations";
+import { getCategories } from "../redux/category/selectors";
+import { fetchProducts } from "../redux/product/operations";
+import { getProducts } from "../redux/product/selectors";
+import Header from "../componets/header";
+export default function Homepage() {
+    const query = new URLSearchParams(useLocation().search);
+    const queryType = query.get("type");
+    const queryCategoryId = query.get("categoryId");
+    const queryCategoryName = query.get("categoryName") || null;
+
+    const history = useHistory();
+
     const dispatch = useDispatch();
-    const selector = useSelector(state => state);
-    const posts = getPosts(selector);
-    let [page, setPage] = useState(1);
-    const [isLoading, setIsLoading] = useState(false);
+    const selector = useSelector((state) => state);
+    const products = getProducts(selector);
+    const categories = getCategories(selector);
+    const carts = getCarts(selector);
+    const [type, setType] = useState(queryType);
+    const [category, setCategory] = useState({ id: queryCategoryId, name: queryCategoryName });
+    const [activeCategory, setActiveCategory] = useState(+queryCategoryId);
+    const [search, setSearch] = useState(null);
+    const [page, setPage] = useState(1);
+
+    const title = type ? (type === "male" ? Male : Female) : "Products List";
+    const defaultSelect = type ? (type === "male" ? "male" : "female") : "FILTER BY GENDER";
+    const isEmptyCategory = categories.results && categories.results.length > 0 ? false : true;
+    const isEmptyProduct = products.results && products.results.length > 0 ? false : true;
+
+    const femaleProduct = products.results.filter((p) => p.type === "female");
+    const maleProduct = products.results.filter((p) => p.type === "male");
+
+    const onPageChange = (e) => {
+        setPage(e.selected + 1);
+        window.scrollTo(0, 0);
+    }
 
     useEffect(() => {
-        dispatch(fetchPosts({ page }));
+        dispatch(
+            fetchProducts({ type, category_id: category.id, search, page }, () => history.replace({ search: "" }))
+        );
+        // eslint-disable-next-line
+    }, [type, category, search, page]);
+
+    useEffect(() => {
+        dispatch(fetchCategories());
+        dispatch(fetchCarts());
         // eslint-disable-next-line
     }, []);
 
-    // Infinite Scroll Pagination Flow
-    const observer = useRef();
-
-    // Reference to a very last post element
-    const lastPostElement = useCallback(
-        node => {
-            if (isLoading) return;
-            // Disconnect reference from previous element, so that new last element is hook up correctly
-            if (observer.current) {
-                observer.current.disconnect();
-            }
-
-            // Observe changes in the intersection of target element
-            observer.current = new IntersectionObserver(async entries => {
-                // That means that we are on the page somewhere, In our case last element of the page
-                if (entries[0].isIntersecting && posts.next) {
-                    // Proceed fetch new page
-                    setIsLoading(true);
-                    setPage(++page);
-                    await dispatch(fetchPosts({ page }));
-                    setIsLoading(false);
-                }
-            });
-
-            // Reconnect back with the new last post element
-            if (node) {
-                observer.current.observe(node);
-            }
-        },
-        // eslint-disable-next-line
-        [posts.next]
-    );
+    const categoryHandler = (category, isReset = false) => {
+        setPage(1);
+        if (isReset) {
+            setCategory({ id: null, name: null });
+            setActiveCategory(0);
+            return;
+        }
+        setCategory({ id: category.id, name: category.name });
+        setActiveCategory(category.id);
+    };
 
     return (
-        <section className="content">
-            <PostForm />
-            <section className="posts">
-                {posts.results.length > 0 ? (
-                    <ul>
-                        {posts.results.map((post, index) => {
-                            return (
-                                <Post
-                                    ref={index === posts.results.length - 1 ? lastPostElement : null}
-                                    key={post.id}
-                                    post={post}
-                                />
-                            );
-                        })}
-                    </ul>
-                ) : (
-                    <div className="no-post">
-                        <img width="72" src={postImage} alt="icon" />
-                        <p>No posts here yet...</p>
-                    </div>
-                )}
-                {isLoading && (
-                    <div className="loading">
-                        <img src={Loading} className="" alt="" />
-                    </div>
-                )}
-            </section>
-        </section>
-    );
-};
+        <>
+            <Header totalCart={carts.totalCart} setSearch={setSearch} setPage={setPage} />
+            <section className="main-wrapper">
+                <div className="homepage">
+                    <div className="homepage-container">
+                        <div className="homepage-content">
+                            <select
+                                defaultValue={defaultSelect}
+                                onChange={(e) => setType(e.target.value)}
+                                className="gender-select"
+                            >
+                                <option value="">FILTER BY GENDER</option>
+                                <option value="male">Men's</option>
+                                <option value="female">Women's</option>
+                            </select>
 
-export default Home;
+                            <div className="right-border">
+                                <p className="homepage-category-text">Category Lists</p>
+                                <div className="category-list">
+                                    <ul>
+                                        <li
+                                            className={activeCategory === 0 ? "active" : ""}
+                                            onClick={() => categoryHandler(null, true)}
+                                        >
+                                            All
+                                        </li>
+                                        {!isEmptyCategory &&
+                                            categories.results.map((c) => (
+                                                <li
+                                                    className={activeCategory === c.id ? "active" : ""}
+                                                    onClick={() => categoryHandler(c)}
+                                                    key={c.id}
+                                                    to="#"
+                                                >
+                                                    {c.name}
+                                                </li>
+                                            ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="homepage-content">
+                            <div className="homepage-title">
+                                {title} {category.name && `- ${category.name}`}
+                            </div>
+                            {!isEmptyProduct ? (
+                                category.name && !type ? (
+                                    <>
+                                        {femaleProduct.length > 0 && (
+                                            <ProductListCard
+                                                labelType={Female}
+                                                products={femaleProduct}
+                                                carts={carts.results}
+                                            />
+                                        )}
+                                        {maleProduct.length > 0 && (
+                                            <ProductListCard
+                                                labelType={Male}
+                                                products={maleProduct}
+                                                carts={carts.results}
+                                            />
+                                        )}
+                                    </>
+                                ) : (
+                                    <ProductListCard products={products.results} carts={carts.results} />
+                                )
+                            ) : (
+                                <Empty message="Products are unavailable." />
+                            )}
+                        </div>
+                    </div>
+                    <div className="product-pagination">
+                        <ReactPaginate
+                            breakLabel="..."
+                            onPageChange={onPageChange}
+                            forcePage={page - 1}
+                            pageRangeDisplayed={3}
+                            pageCount={products.total_pages}
+                            renderOnZeroPageCount={null}
+                            containerClassName="pagination-container"
+                            pageClassName="page-item"
+                            breakClassName="page-item"
+                            pageLinkClassName="page-link"
+                            breakLinkClassName="page-link"
+                            previousClassName="d-none"
+                            nextClassName="d-none"
+                            activeClassName="page-active"
+                        />
+                    </div>
+                </div>
+            </section>
+        </>
+    );
+}

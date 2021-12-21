@@ -1,66 +1,103 @@
-import axios from 'axios';
-const LOGIN_USER_KEY = 'WD_FORUM_LOGIN_USER_KEY';
+import axios from "axios";
+require('dotenv').config()
 
-var baseURL;
-if (process.env.REACT_APP_ENVIRONMENT && process.env.REACT_APP_ENVIRONMENT === 'PRODUCTION') {
-    baseURL = process.env.REACT_APP_API_BASE_URL;
-} else {
-    baseURL = 'http://127.0.0.1:8000';
-}
+export const LOGIN_USER_KEY = "HIVE_TECHWEAR_LOGIN_USER_KEY";
+const { REACT_APP_API } = process.env;
+let baseURL = REACT_APP_API;
+
 
 const api = axios.create({
     baseURL: baseURL,
     headers: {
-        'Content-Type': 'application/json'
-    }
+        "Content-Type": "application/json",
+    },
 });
 
-/**
- * Add requireToken: true in request config, for API that required Authorization token
- */
 api.interceptors.request.use(
-    config => {
-        if (config.requireToken && localStorage.getItem(LOGIN_USER_KEY)) {
-            config.headers.common['Authorization'] = JSON.parse(localStorage.getItem(LOGIN_USER_KEY)).token;
+    (config) => {
+        if (config.requireToken) {
+            const user = localStorage.getItem(LOGIN_USER_KEY)
+                ? JSON.parse(localStorage.getItem(LOGIN_USER_KEY))
+                : null;
+            config.headers.common["Authorization"] = user.token;
         }
 
         return config;
     },
-    err => {
-        console.error(err);
+    (err) => console.error(err)
+);
+
+api.interceptors.response.use(
+    (response) => {
+        return response.data;
+    },
+    (error) => {
+        console.log("error.response", error);
+        if (error.response.status === 401) {
+            localStorage.removeItem(LOGIN_USER_KEY);
+        }
+
+        return Promise.reject(error);
     }
 );
 
 export default class API {
-    getPosts = params => {
-        return api
-            .get('/posts/', { params })
-            .then(response => {
-                return response.data;
-            })
-            .catch(error => {
-                throw new Error(error);
-            });
-    };
-    addPost = postBody => {
+    signUp = async (signUpBody) => {
         const formData = new FormData();
 
-        for (const key in postBody) {
-            formData.append(key, postBody[key]);
+        for (const key in signUpBody) {
+            formData.append(key, signUpBody[key]);
         }
 
-        return api
-            .post('/posts/add/', formData)
-            .then(response => {
-                return response.data;
-            })
-            .catch(error => {
-                throw new Error(error);
-            });
+        return api.post("/users/signup/", formData);
     };
-    deletePost = id => {
-        return api.delete(`/posts/delete/${id}/`).catch(error => {
-            throw new Error(error);
+
+
+    signIn = async (signInBody) => {
+        const formData = new FormData();
+        for (const key in signInBody) {
+            formData.append(key, signInBody[key]);
+        }
+        return api.post("/users/signin/", formData);
+    };
+
+    // Category
+    getCategories = () => {
+        return api.get("/categories/");
+    };
+
+    // Product
+    getProducts = (query = {}) => {
+        return api.get("/products/", { params: query, requireToken: true });
+    };
+
+    // Cart
+    getCarts = (query = {}) => {
+        return api.get("/carts/", { params: query, requireToken: true });
+    };
+
+    addCart = (addCartBody) => {
+        const formData = new FormData();
+        for (const key in addCartBody) {
+            formData.append(key, addCartBody[key]);
+        }
+        return api.post("/carts/add/", formData, { requireToken: true });
+    };
+
+    updateCart = (updateCartBody, cartId) => {
+        const formData = new FormData();
+        for (const key in updateCartBody) {
+            formData.append(key, updateCartBody[key]);
+        }
+        return api.put(`/carts/update/${cartId}/`, formData, {
+            requireToken: true,
         });
     };
+
+    // Checkout
+    checkoutOrder = (checkoutOrderBody) => {
+        return api.post("/orders/add/", checkoutOrderBody, { requireToken: true });
+    };
+
+
 }
