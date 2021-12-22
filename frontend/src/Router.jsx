@@ -9,8 +9,8 @@ import Landing from './containers/landing';
 import SignIn from './containers/signin';
 import SignUp from './containers/signup';
 import ThankYou from './containers/thankyou';
-import { fetchUserFromLocalStorage } from './reducks/users/operations';
-import { getUser } from './reducks/users/selectors';
+import { fetchUserFromLocalStorage } from './redux/users/operations';
+import { getUser } from './redux/users/selectors';
 
 const Router = () => {
     const dispatch = useDispatch();
