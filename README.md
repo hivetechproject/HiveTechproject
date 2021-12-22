@@ -6,7 +6,7 @@ Hive TechWear, with a frontend built in React & Redux and a backend built in Dja
 
 ## Live Demo
 
-Check out [FRONTEND LIVE DEMO](https://forum-prod-frontend.herokuapp.com/) here!!
+Check out [FRONTEND LIVE DEMO](https://front-end-hivetech.herokuapp.com) here!!
 
 Check out [API LIVE DEMO](https://forum-prod-api.herokuapp.com/) here!!
 
