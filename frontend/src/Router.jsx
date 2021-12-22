@@ -4,7 +4,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import Cart from './containers/cart';
 import Checkout from './containers/shipping';
-import Homepage from './containers/Homepage';
+import Homepage from './containers/Home';
 import Landing from './containers/landing';
 import SignIn from './containers/signin';
 import SignUp from './containers/signup';
