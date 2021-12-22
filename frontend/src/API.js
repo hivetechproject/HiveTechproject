@@ -1,20 +1,26 @@
 import axios from "axios";
-// const LOGIN_USER_KEY = "LOGIN_USER_KEY";
+require('dotenv').config()
+
 export const LOGIN_USER_KEY = "HIVE_TECHWEAR_LOGIN_USER_KEY";
+const { REACT_APP_ENVIRONMENT, REACT_APP_API_BASE_URL_PROD, REACT_APP_API_BASE_URL_DEV } = process.env;
+let baseURL;
 
-var baseURL;
-baseURL = "http://127.0.0.1:8000/";
-// require('dotenv').config()
+if (REACT_APP_ENVIRONMENT === "PRODUCTION") {
+	baseURL = REACT_APP_API_BASE_URL_PROD;
+} else {
+	baseURL = REACT_APP_API_BASE_URL_DEV;
+}
 
-// export const LOGIN_USER_KEY = "HIVE_TECHWEAR_LOGIN_USER_KEY";
-// const { REACT_APP_ENVIRONMENT, REACT_APP_API_BASE_URL_PROD, REACT_APP_API_BASE_URL_DEV } = process.env;
-// let baseURL;
+const api = axios.create({
+  baseURL: baseURL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-// if (REACT_APP_ENVIRONMENT === "PRODUCTION") {
-// 	baseURL = REACT_APP_API_BASE_URL_PROD;
-// } else {
-// 	baseURL = REACT_APP_API_BASE_URL_DEV;
-// }
+// var baseURL;
+// baseURL = "http://127.0.0.1:8000/";
+
 
 const api = axios.create({
   baseURL: baseURL,
