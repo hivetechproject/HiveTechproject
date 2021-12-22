@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import Cart from './containers/Cart';
+import Cart from './containers/cart';
 import Checkout from './containers/Checkout';
 import Homepage from './containers/Homepage';
 import Landing from './containers/Landing';
