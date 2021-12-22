@@ -3,12 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import Cart from './containers/cart';
-import Checkout from './containers/Checkout';
+import Checkout from './containers/shipping';
 import Homepage from './containers/Homepage';
-import Landing from './containers/Landing';
-import SignIn from './containers/SignIn';
-import SignUp from './containers/SignUp';
-import ThankYou from './containers/ThankYou';
+import Landing from './containers/landing';
+import SignIn from './containers/signin';
+import SignUp from './containers/signup';
+import ThankYou from './containers/thankyou';
 import { fetchUserFromLocalStorage } from './reducks/users/operations';
 import { getUser } from './reducks/users/selectors';
 
@@ -26,11 +26,11 @@ const Router = () => {
     return (
         <Switch>
             <Route exact path={"/"} component={token ? Homepage : Landing} />
-            <Route exact path={"/sign-in"} component={SignIn} />
-            <Route exact path={"/sign-up"} component={SignUp} />
+            <Route exact path={"/signin"} component={SignIn} />
+            <Route exact path={"/signup"} component={SignUp} />
             <Route exact path={"/cart"} component={Cart} />
             <Route exact path={"/checkout"} component={Checkout} />
-            <Route exact path={"/thank-you"} component={ThankYou} />
+            <Route exact path={"/thankyou"} component={ThankYou} />
         </Switch>
     );
 };
