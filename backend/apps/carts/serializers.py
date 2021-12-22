@@ -4,6 +4,7 @@ from apps.users.serializers import UserSerializer
 from apps.products.serializers import ProductSerializer
 
 class CartListSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
     class Meta:
         model = Cart
         fields = [
@@ -51,3 +52,5 @@ class CartUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
 
         return data
+
+        

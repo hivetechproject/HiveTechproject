@@ -7,3 +7,4 @@ class UserModel(admin.ModelAdmin):
     list_filter = []
     list_display = fields
     search_fields = ['name', 'email']
+

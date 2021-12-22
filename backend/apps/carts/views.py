@@ -74,3 +74,4 @@ class CartUpdate(CustomLoginRequiredMixin, generics.UpdateAPIView):
 
         # Response data as Dict
         return Response(serializer.data)
+

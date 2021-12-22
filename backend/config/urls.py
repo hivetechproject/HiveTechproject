@@ -1,4 +1,4 @@
-"""backend URL Configuration
+"""budget_notebook URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.2/topics/http/urls/
@@ -22,5 +22,5 @@ urlpatterns = [
     path('categories/', include('apps.categories.urls')),
     path('products/', include('apps.products.urls')),
     path('carts/', include('apps.carts.urls')),
-    path('orders/', include('apps.orders.urls')),
+    path('orders/', include('apps.orders.urls'))
 ]
